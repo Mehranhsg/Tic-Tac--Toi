@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        @keyframes border-dance {
+            0% {
+                border-style: dotted;
+                border-width: 8px;
+                border-color: #ff0303;
+            }
+            25% {
+                border-style: dashed;
+                border-width: 8px;
+                border-color: #ff7303;
+            }
+            50% {
+                border-style: solid;
+                border-width: 8px;
+                border-color: #ff0303;
+            }
+            75% {
+                border-style: dashed;
+                border-width: 8px;
+                border-color: #ff7303;
+            }
+            100% {
+                border-style: dotted;
+                border-width: 8px;
+                border-color: #ff0303;
+            }
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .main_container {
+            margin: auto;
+            width: 90%;
+            max-width: 500px;
+            height: auto;
+            padding: 20px;
+            border: 8px dotted #ff0303;
+            background-color: #565e10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            animation: border-dance 3s infinite;
+        }
+
+        .row {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .col {
+            background-color: #eee;
+            border: 1px solid black;
+            width: 32%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 85px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 5px;
+        }
+
+        .col:hover {
+            background-color: #ddd;
+        }
+
+        .x_col {
+            color: red;
+            transition: color 0.3s ease;
+        }
+
+        .o_col {
+            color: black;
+            transition: color 0.3s ease;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .message {
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: #ff0303;
+        }
+
+        .ai-image {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            top: -30px;
+            right: -30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main_container">
+        <img src="https://media.giphy.com/media/2A75RyXVzzSI2bx4Gj/giphy.gif" class="ai-image" alt="AI">
+        <div class="row">
+            <div class="col" onclick="markColumn(this, 0)"></div>
+            <div class="col" onclick="markColumn(this, 1)"></div>
+            <div class="col" onclick="markColumn(this, 2)"></div>
+        </div>
+        <div class="row">
+            <div class="col" onclick="markColumn(this, 3)"></div>
+            <div class="col" onclick="markColumn(this, 4)"></div>
+            <div class="col" onclick="markColumn(this, 5)"></div>
+        </div>
+        <div class="row">
+            <div class="col" onclick="markColumn(this, 6)"></div>
+            <div class="col" onclick="markColumn(this, 7)"></div>
+            <div class="col" onclick="markColumn(this, 8)"></div>
+        </div>
+        <div class="message" id="message"></div>
+        <button class="btn" id="restartButton" onclick="resetGame()">Play Again</button>
+    </div>
+
+    <script>
+        let arr = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let turn = true; // true for X, false for O
+        let gameOver = false;
+
+        alert("Turn: X Player");
+
+        function markColumn(that, position) {
+            if (that.innerHTML != "" || gameOver) {
+                return false;
+            }
+            if (turn) {
+                that.innerHTML = "X";
+                that.classList.add("x_col");
+                arr[position] = 1;
+            } else {
+                that.innerHTML = "O";
+                arr[position] = 2;
+                that.classList.add("o_col");
+            }
+            checkPatterns(turn);
+            turn = !turn;
+
+            if (!gameOver && !turn) {
+                setTimeout(computerMove, 500);
+            }
+        }
+
+        function checkPatterns(turn) {
+            let turn_num = (turn) ? 1 : 2;
+            let row1 = (arr[0] == turn_num && arr[1] == turn_num && arr[2] == turn_num);
+            let row2 = (arr[3] == turn_num && arr[4] == turn_num && arr[5] == turn_num);
+            let row3 = (arr[6] == turn_num && arr[7] == turn_num && arr[8] == turn_num);
+            let col1 = (arr[0] == turn_num && arr[3] == turn_num && arr[6] == turn_num);
+            let col2 = (arr[1] == turn_num && arr[4] == turn_num && arr[7] == turn_num);
+            let col3 = (arr[2] == turn_num && arr[5] == turn_num && arr[8] == turn_num);
+            let diagonal_1 = (arr[0] == turn_num && arr[4] == turn_num && arr[8] == turn_num);
+            let diagonal_2 = (arr[2] == turn_num && arr[4] == turn_num && arr[6] == turn_num);
+
+            if (row1 || row2 || row3 || col1 || col2 || col3 || diagonal_1 || diagonal_2) {
+                showMessage(turn ? "X is the winner!" : "O is the winner!");
+                gameOver = true;
+                document.getElementById('restartButton').style.display = 'block';
+            } else if (arr.every(cell => cell !== 0)) {
+                showMessage("It's a draw!");
+                gameOver = true;
+                document.getElementById('restartButton').style.display = 'block';
+            }
+        }
+
+        function showMessage(message) {
+            document.getElementById('message').textContent = message;
+        }
+
+        function resetGame() {
+            arr = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+            turn = true;
+            gameOver = false;
+            let cells = document.querySelectorAll('.col');
+            cells.forEach(cell => {
+                cell.innerHTML = "";
+                cell.classList.remove("x_col", "o_col");
+            });
+            document.getElementById('message').textContent = "";
+            document.getElementById('restartButton').style.display = 'none';
+            alert("Turn: X Player");
+        }
+
+        function computerMove() {
+            if (gameOver) return;
+            let emptyCells = arr.map((val, idx) => val === 0 ? idx : null).filter(val => val !== null);
+            let move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            let cell = document.querySelectorAll('.col')[move];
+            markColumn(cell, move);
+        }
+    </script>
+</body>
+</html>
